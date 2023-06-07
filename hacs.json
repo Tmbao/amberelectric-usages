@@ -1,0 +1,11 @@
+{
+  "name": "Hass.io Add-ons",
+  "country": "AU",
+  "domains": [
+      "sensor"
+  ],
+  "homeassistant": "2023.5.4",
+  "iot_class": [
+      "Cloud Polling"
+  ]
+}
