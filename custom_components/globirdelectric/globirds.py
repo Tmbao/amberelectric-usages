@@ -34,7 +34,7 @@ class GlobirdError(Exception):
     pass
 
 
-class GlobirdAuth(object):
+class GlobirdServiceClient(object):
     def __init__(
         self, service_id: str, site_id: str, session: requests.Session
     ) -> None:
@@ -43,7 +43,7 @@ class GlobirdAuth(object):
         self.session = session
 
     @classmethod
-    def authenticate(cls, access_token: str, site_id: str) -> "GlobirdAuth":
+    def authenticate(cls, access_token: str, site_id: str) -> "GlobirdServiceClient":
         session = requests.Session()
 
         response = session.get(USER_URL, cookies={"globird-portal-user": access_token})
@@ -62,7 +62,7 @@ class GlobirdAuth(object):
                 "Unable to find electricity service: {}\n{}".format(site_id, body)
             )
 
-        return GlobirdAuth(service_id, site_id, session)
+        return GlobirdServiceClient(service_id, site_id, session)
 
 
 class GlobirdChargeType(Enum):
@@ -132,7 +132,9 @@ class GlobirdStore(object):
             seconds=now.second,
             microseconds=now.microsecond,
         )
-        return now - discard
+        normalized_now = now - discard
+        normalized_now.replace(tzinfo=False)
+        return normalized_now
 
     def merge_data(self, reader: Iterator[list[str]]) -> None:
         charge_type = None
@@ -151,18 +153,18 @@ class GlobirdStore(object):
             if row[0] == "Date/Time":
                 col_time = []
                 for i in range(1, len(row)):
-                    col_time.append(datetime.datetime.strptime(row[i], "%H:%M"))
+                    col_time.append(datetime.datetime.strptime(row[i], "%H:%M").time())
                 continue
             if row[0] == "Total for Period":
                 continue
 
             # Usage data
-            date = datetime.datetime.strptime(row[0], "%Y%m%d")
+            date = datetime.datetime.strptime(row[0], "%Y%m%d").date()
             if self._latest_date is None or self._latest_date < date:
                 self._latest_date = date
             for i in range(1, len(row)):
                 time = col_time[i - 1]
-                dt_key = datetime.datetime.combine(date, time)
+                dt_key = datetime.datetime.combine(date, time, tzinfo=False)
                 if charge_type == GlobirdChargeType.SOLAR_FEED_IN:
                     self._feedin_data_points[dt_key] = GlobirdDataPoint(
                         date, time, float(row[i])
@@ -174,7 +176,7 @@ class GlobirdStore(object):
 
 
 class GlobirdDAO(object):
-    def __init__(self, auth: GlobirdAuth, estimator: BaseEstimator) -> None:
+    def __init__(self, auth: GlobirdServiceClient, estimator: BaseEstimator) -> None:
         self._auth = auth
         self._store = GlobirdStore(estimator)
         self._download_lock = multiprocessing.Lock()
@@ -205,6 +207,8 @@ class GlobirdDAO(object):
 
         self._last_read_dt = now
         self._last_read = read
+
+        _LOGGER.warn("Data read at %s: %f", now, read)
         return delta
 
     def _download_data(self, now: datetime.datetime) -> None:

@@ -17,7 +17,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
 from .estimators import Last30DaysEstimator
-from .globirds import GlobirdAuth, GlobirdDAO
+from .globirds import GlobirdServiceClient, GlobirdDAO
 
 DOMAIN = "globirdelectric"
 
@@ -44,7 +44,7 @@ def setup_platform(
     access_token = config.get(CONF_ACCESS_TOKEN)
     site_id = config.get(CONF_SITE)
 
-    auth = GlobirdAuth.authenticate(access_token, site_id)
+    auth = GlobirdServiceClient.authenticate(access_token, site_id)
     globird_dao = GlobirdDAO(auth, Last30DaysEstimator())
 
     add_entities([GlobirdElectricSensor(sensor_name, globird_dao)])
