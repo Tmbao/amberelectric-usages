@@ -1,5 +1,6 @@
 """Globird Electric Sensor definitions."""
 from __future__ import annotations
+from datetime import timedelta
 
 
 import homeassistant.helpers.config_validation as cv
@@ -15,21 +16,23 @@ from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
+from homeassistant.util import Throttle
 
 from .estimators import Last30DaysEstimator
 from .globirds import GlobirdServiceClient, GlobirdDAO
 
 DOMAIN = "globirdelectric"
 
-CONF_ACCESS_TOKEN = "access_token"
-CONF_SITE = "site"
+_SCAN_INTERVAL = timedelta(minutes=5)
 
+_CONF_ACCESS_TOKEN = "access_token"
+_CONF_SITE = "site"
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
         vol.Optional(CONF_NAME, default="electric_smart_meter_sensor"): cv.string,
-        vol.Required(CONF_ACCESS_TOKEN): cv.string,
-        vol.Required(CONF_SITE): cv.string,
+        vol.Required(_CONF_ACCESS_TOKEN): cv.string,
+        vol.Required(_CONF_SITE): cv.string,
     }
 )
 
@@ -41,8 +44,8 @@ def setup_platform(
     discovery_info: DiscoveryInfoType | None = None,
 ) -> None:
     sensor_name = config.get(CONF_NAME)
-    access_token = config.get(CONF_ACCESS_TOKEN)
-    site_id = config.get(CONF_SITE)
+    access_token = config.get(_CONF_ACCESS_TOKEN)
+    site_id = config.get(_CONF_SITE)
 
     auth = GlobirdServiceClient.authenticate(access_token, site_id)
     globird_dao = GlobirdDAO(auth, Last30DaysEstimator())
@@ -62,6 +65,7 @@ class GlobirdElectricSensor(SensorEntity):
         self._attr_state_class = STATE_CLASS_TOTAL_INCREASING
         self._attr_native_unit_of_measurement = "kWh"
 
+    @Throttle(_SCAN_INTERVAL)
     def update(self):
         now = dt_util.as_local(dt_util.now())
         self._attr_native_value = self.globird_dao.fetch(now)
