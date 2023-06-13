@@ -133,12 +133,17 @@ class GlobirdStore(object):
             microseconds=now.microsecond,
         )
         normalized_now = now - discard
-        normalized_now.replace(tzinfo=False)
-        return normalized_now
+        return datetime.datetime(
+            year=normalized_now.year,
+            month=normalized_now.month,
+            day=normalized_now.day,
+            hour=normalized_now.hour,
+            minute=normalized_now.minute,
+        )
 
     def merge_data(self, reader: Iterator[list[str]]) -> None:
-        charge_type = None
-        col_time = []
+        charge_type: GlobirdChargeType = None
+        col_time: list[datetime.time] = []
         for row in reader:
             # Special rows
             if row[0] == "Nmi":
@@ -164,7 +169,13 @@ class GlobirdStore(object):
                 self._latest_date = date
             for i in range(1, len(row)):
                 time = col_time[i - 1]
-                dt_key = datetime.datetime.combine(date, time, tzinfo=False)
+                dt_key = datetime.datetime(
+                    year=date.year,
+                    month=date.month,
+                    day=date.day,
+                    hour=time.hour,
+                    minute=time.minute,
+                )
                 if charge_type == GlobirdChargeType.SOLAR_FEED_IN:
                     self._feedin_data_points[dt_key] = GlobirdDataPoint(
                         date, time, float(row[i])
