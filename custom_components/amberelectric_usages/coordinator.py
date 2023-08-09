@@ -38,9 +38,10 @@ class AmberUsagesCoordinator(DataUpdateCoordinator):
             name=DOMAIN,
             update_interval=timedelta(hours=1),
         )
+        self.lastest_time: datetime = None
+        self.site_id = site_id
         self._hass = hass
         self._api = api
-        self._site_id = site_id
         self._statistic_id_prefix = (
             f"{DOMAIN}:{entry_title.lower().replace('-', '')}_usages"
         )
@@ -49,7 +50,7 @@ class AmberUsagesCoordinator(DataUpdateCoordinator):
         today = dt_util.now().date()
         day_2_weeks_ago = today - timedelta(weeks=2)
         return self._api.get_usage(
-            self._site_id, start_date=day_2_weeks_ago, end_date=today
+            self.site_id, start_date=day_2_weeks_ago, end_date=today
         )
 
     async def _async_update_data(self) -> None:
@@ -117,4 +118,8 @@ class AmberUsagesCoordinator(DataUpdateCoordinator):
                 statistics.append(
                     StatisticData(state=total_kwh, sum=last_stat_sum, start=start_hour)
                 )
+
+                if self.lastest_time is None or self.lastest_time < start_hour:
+                    self.lastest_time = start_hour
+
             async_add_external_statistics(self._hass, metadata, statistics)
