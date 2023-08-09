@@ -2,8 +2,8 @@
   "domain": "amberelectric-usages",
   "name": "Amber Electric - Usages",
   "iot_class": "cloud_polling",
-  "documentation": "https://github.com/Tmbao/hassio-addons/blob/master/custom_components/amberelectricusages/README.md",
-  "issue_tracker": "https://github.com/Tmbao/hassio-addons/issues",
+  "documentation": "https://github.com/Tmbao/amberelectric-usages/blob/master/README.md",
+  "issue_tracker": "https://github.com/Tmbao/amberelectric-usages/issues",
   "requirements": [
     "amberelectric==1.0.4"
   ],
