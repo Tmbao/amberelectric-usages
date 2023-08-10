@@ -6,7 +6,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_API_TOKEN
 from homeassistant.core import HomeAssistant
 
-from .const import CONF_SITE_ID, CONF_SITE_NAME, DOMAIN, PLATFORMS
+from .const import CONF_SITE_ID, DOMAIN, PLATFORMS
 from .coordinator import AmberUsagesCoordinator
 
 
@@ -20,8 +20,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass, api_instance, site_id, entry.title
     )
     await usages_coordinator.async_config_entry_first_refresh()
+    hass.setdefault(DOMAIN, {})[entry.entry_id] = usages_coordinator
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
-    hass.data[DOMAIN] = usages_coordinator
     return True
 
 

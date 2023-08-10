@@ -39,9 +39,7 @@ class AmberUsagesLatestDataSensor(
         self.site_id = coordinator.site_id
         self.entity_description = description
 
-        self._attr_unique_id = (
-            f"{self.site_id}-{self.entity_description.key}"
-        )
+        self._attr_unique_id = f"{self.site_id}-{self.entity_description.key}"
 
     @property
     def native_value(self) -> datetime | None:
@@ -59,7 +57,7 @@ async def async_setup_entry(
         key="usages-latest-time",
         name=f"{entry.title} usages latest time",
         state_class=SensorStateClass.MEASUREMENT,
-        icon="mdi:clock-end"
+        icon="mdi:clock-end",
     )
     entity = AmberUsagesLatestDataSensor(coordinator, description)
 
