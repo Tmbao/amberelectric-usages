@@ -12,6 +12,7 @@ from homeassistant.components.sensor import (
     SensorEntity,
     SensorEntityDescription,
     SensorStateClass,
+    SensorDeviceClass,
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -57,6 +58,7 @@ async def async_setup_entry(
         key="usages-latest-time",
         name=f"{entry.title} usages latest time",
         state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.TIMESTAMP,
         icon="mdi:clock-end",
     )
     entity = AmberUsagesLatestDataSensor(coordinator, description)

@@ -13,7 +13,7 @@ from homeassistant.components.recorder.statistics import (
     get_last_statistics,
 )
 from homeassistant.components.recorder.util import get_instance
-from homeassistant.const import CURRENCY_CENT, UnitOfEnergy
+from homeassistant.const import CURRENCY_DOLLAR, UnitOfEnergy
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
@@ -143,7 +143,7 @@ class AmberUsagesCoordinator(DataUpdateCoordinator):
                 name=f"{self._cost_statistic_id_prefix} - {channel}",
                 source=DOMAIN,
                 statistic_id=statistic_id,
-                unit_of_measurement=CURRENCY_CENT,
+                unit_of_measurement=CURRENCY_DOLLAR,
             )
 
             last_stat_sum: float = 0
@@ -167,7 +167,7 @@ class AmberUsagesCoordinator(DataUpdateCoordinator):
 
                 total_cost: float = 0
                 for usage in usages:
-                    total_cost += usage.cost
+                    total_cost += usage.cost / 100
 
                 last_stat_sum += total_cost
 
