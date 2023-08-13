@@ -51,9 +51,9 @@ class AmberUsagesCoordinator(DataUpdateCoordinator):
 
     def _get_usages(self) -> list[Usage]:
         today = dt_util.now().date()
-        day_2_weeks_ago = today - timedelta(weeks=2)
+        day_4_weeks_ago = today - timedelta(weeks=4)
         return self._api.get_usage(
-            self.site_id, start_date=day_2_weeks_ago, end_date=today
+            self.site_id, start_date=day_4_weeks_ago, end_date=today
         )
 
     async def _async_update_data(self) -> None:
@@ -160,7 +160,7 @@ class AmberUsagesCoordinator(DataUpdateCoordinator):
                 )
 
             statistics: list[StatisticData] = []
-            for start_hour, usages in usages_by_hour.items():
+            for start_hour, usages in sorted(usages_by_hour.items()):
                 # Skip if we've read this data
                 if last_stat_start is not None and start_hour <= last_stat_start:
                     continue
