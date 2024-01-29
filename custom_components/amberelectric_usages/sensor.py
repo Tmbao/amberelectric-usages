@@ -57,7 +57,6 @@ async def async_setup_entry(
     description = SensorEntityDescription(
         key="usages-latest-time",
         name=f"{entry.title} usages latest time",
-        state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.TIMESTAMP,
         icon="mdi:clock-end",
     )
