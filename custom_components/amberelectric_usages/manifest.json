@@ -4,7 +4,7 @@
   "iot_class": "cloud_polling",
   "documentation": "https://github.com/Tmbao/amberelectric-usages/blob/master/README.md",
   "issue_tracker": "https://github.com/Tmbao/amberelectric-usages/issues",
-  "requirements": ["amberelectric==1.1.0"],
+  "requirements": ["amberelectric==1.1.1"],
   "codeowners": ["@tmbao"],
   "loggers": ["amberelectric_usages"],
   "version": "1.0.1",
