@@ -1,6 +1,6 @@
 """Support for Amber Electric - Usages."""
 
-from amberelectric import Configuration
+from amberelectric import Configuration, ApiClient
 from amberelectric.api import amber_api
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_API_TOKEN
@@ -13,7 +13,8 @@ from .coordinator import AmberUsagesCoordinator
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Amber Electric from a config entry."""
     configuration = Configuration(access_token=entry.data[CONF_API_TOKEN])
-    api_instance = amber_api.AmberApi.create(configuration)
+    api_client = ApiClient(configuration)
+    api_instance = amber_api.AmberApi(api_client)
     site_id = entry.data[CONF_SITE_ID]
 
     usages_coordinator = AmberUsagesCoordinator(

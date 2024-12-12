@@ -6,7 +6,7 @@ from typing import Any
 
 from amberelectric import ApiException
 from amberelectric.api import amber_api
-from amberelectric.model.usage import Usage
+from amberelectric.models.usage import Usage
 from homeassistant.components.recorder.models import StatisticData, StatisticMetaData
 from homeassistant.components.recorder.statistics import (
     async_add_external_statistics,

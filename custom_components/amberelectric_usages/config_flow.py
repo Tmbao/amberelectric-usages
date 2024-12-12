@@ -4,7 +4,7 @@ from __future__ import annotations
 import amberelectric
 import voluptuous as vol
 from amberelectric.api import amber_api
-from amberelectric.model.site import Site
+from amberelectric.models.site import Site
 from homeassistant import config_entries
 from homeassistant.const import CONF_API_TOKEN
 from homeassistant.data_entry_flow import FlowResult
