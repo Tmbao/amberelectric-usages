@@ -72,15 +72,15 @@ class AmberUsagesCoordinator(DataUpdateCoordinator):
 
         usages_by_hour_by_channel: dict[str, dict[datetime, list[Usage]]] = {}
         for usage in raw_usages:
-            usages_by_hour_by_channel.setdefault(usage.channelIdentifier, {})
+            usages_by_hour_by_channel.setdefault(usage.channel_identifier, {})
 
             start_time_hour = usage.start_time - timedelta(
                 minutes=usage.start_time.minute, seconds=usage.start_time.second
             )
-            usages_by_hour_by_channel[usage.channelIdentifier].setdefault(
+            usages_by_hour_by_channel[usage.channel_identifier].setdefault(
                 start_time_hour, []
             )
-            usages_by_hour_by_channel[usage.channelIdentifier][start_time_hour].append(
+            usages_by_hour_by_channel[usage.channel_identifier][start_time_hour].append(
                 usage
             )
 
