@@ -6,7 +6,7 @@ from typing import Any
 
 from amberelectric import ApiException
 from amberelectric.api import amber_api
-from amberelectric.model.usage import Usage
+from amberelectric.models.usage import Usage
 from homeassistant.components.recorder.models import StatisticData, StatisticMetaData
 from homeassistant.components.recorder.statistics import (
     async_add_external_statistics,
@@ -50,11 +50,16 @@ class AmberUsagesCoordinator(DataUpdateCoordinator):
         )
 
     def _get_usages(self) -> list[Usage]:
-        today = dt_util.now().date()
-        day_4_weeks_ago = today - timedelta(weeks=4)
-        return self._api.get_usage(
-            self.site_id, start_date=day_4_weeks_ago, end_date=today
-        )
+        usages: list[Usage] = []
+        # Fetch the data from the last 4 weeks, however the maximum range that amber API support is 7 days
+        # Therefore, fetching the data 4 times
+        for offset in range(4):
+            today = dt_util.now().date() - timedelta(weeks=offset)
+            day_4_weeks_ago = today - timedelta(weeks=1)
+            usages += self._api.get_usage(
+                self.site_id, start_date=day_4_weeks_ago, end_date=today
+            )
+        return usages
 
     async def _async_update_data(self) -> None:
         raw_usages: list[Usage] = []
@@ -67,15 +72,15 @@ class AmberUsagesCoordinator(DataUpdateCoordinator):
 
         usages_by_hour_by_channel: dict[str, dict[datetime, list[Usage]]] = {}
         for usage in raw_usages:
-            usages_by_hour_by_channel.setdefault(usage.channelIdentifier, {})
+            usages_by_hour_by_channel.setdefault(usage.channel_identifier, {})
 
             start_time_hour = usage.start_time - timedelta(
                 minutes=usage.start_time.minute, seconds=usage.start_time.second
             )
-            usages_by_hour_by_channel[usage.channelIdentifier].setdefault(
+            usages_by_hour_by_channel[usage.channel_identifier].setdefault(
                 start_time_hour, []
             )
-            usages_by_hour_by_channel[usage.channelIdentifier][start_time_hour].append(
+            usages_by_hour_by_channel[usage.channel_identifier][start_time_hour].append(
                 usage
             )
 
