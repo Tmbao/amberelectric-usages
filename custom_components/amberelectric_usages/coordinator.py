@@ -50,19 +50,22 @@ class AmberUsagesCoordinator(DataUpdateCoordinator):
         )
 
     def _get_usages(self) -> list[Usage]:
-        today = dt_util.now().date()
-        day_4_weeks_ago = today - timedelta(weeks=4)
-        LOGGER.debug("Fetching Amber data from %s to %s for %s", day_4_weeks_ago, today, self.site_id)
-        return self._api.get_usage(
-            self.site_id, start_date=day_4_weeks_ago, end_date=today
-        )
+        usages: list[Usage] = []
+        # Fetch the data from the last 4 weeks, however the maximum range that amber API support is 7 days
+        # Therefore, fetching the data 4 times
+        for offset in range(4):
+            today = dt_util.now().date() - timedelta(weeks=offset)
+            day_4_weeks_ago = today - timedelta(weeks=1)
+            usages += self._api.get_usage(
+                self.site_id, start_date=day_4_weeks_ago, end_date=today
+            )
+        return usages
 
     async def _async_update_data(self) -> None:
         raw_usages: list[Usage] = []
         try:
             raw_usages = await self._hass.async_add_executor_job(self._get_usages)
         except ApiException as api_exception:
-            LOGGER.debug("Error while fetching:\n%s", api_exception)
             raise UpdateFailed("Missing usage data, skipping update") from api_exception
 
         LOGGER.debug("Fetched new Amber data: %s", raw_usages)
