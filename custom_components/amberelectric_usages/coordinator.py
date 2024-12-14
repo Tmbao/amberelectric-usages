@@ -62,6 +62,7 @@ class AmberUsagesCoordinator(DataUpdateCoordinator):
         try:
             raw_usages = await self._hass.async_add_executor_job(self._get_usages)
         except ApiException as api_exception:
+            LOGGER.debug("Error while fetching:\n%s", api_exception)
             raise UpdateFailed("Missing usage data, skipping update") from api_exception
 
         LOGGER.debug("Fetched new Amber data: %s", raw_usages)
