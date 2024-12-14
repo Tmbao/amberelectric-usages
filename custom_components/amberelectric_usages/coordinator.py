@@ -52,6 +52,7 @@ class AmberUsagesCoordinator(DataUpdateCoordinator):
     def _get_usages(self) -> list[Usage]:
         today = dt_util.now().date()
         day_4_weeks_ago = today - timedelta(weeks=4)
+        LOGGER.debug("Fetching Amber data from %s to %s for %s", day_4_weeks_ago, today, self.site_id)
         return self._api.get_usage(
             self.site_id, start_date=day_4_weeks_ago, end_date=today
         )
