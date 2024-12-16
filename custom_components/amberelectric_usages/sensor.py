@@ -19,7 +19,8 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import ATTRIBUTION, DOMAIN
+from . import AmberConfigEntry
+from .const import ATTRIBUTION
 from .coordinator import AmberUsagesCoordinator
 
 
@@ -49,10 +50,10 @@ class AmberUsagesLatestDataSensor(
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
+    entry: AmberConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    coordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator = entry.runtime_data
 
     description = SensorEntityDescription(
         key="usages-latest-time",
