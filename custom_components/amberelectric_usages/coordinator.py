@@ -6,6 +6,7 @@ from typing import Any
 
 from amberelectric import ApiException
 from amberelectric.api import amber_api
+from amberelectric.models.channel_type import ChannelType
 from amberelectric.models.usage import Usage
 from homeassistant.components.recorder.models import StatisticData, StatisticMetaData
 from homeassistant.components.recorder.statistics import (
@@ -172,7 +173,12 @@ class AmberUsagesCoordinator(DataUpdateCoordinator):
 
                 total_cost: float = 0
                 for usage in usages:
-                    total_cost += usage.cost / 100
+                    cost = usage.cost / 100
+                    # Amber reports feed-in as a negative credit; the energy
+                    # dashboard expects compensation as a positive value
+                    if usage.channel_type == ChannelType.FEEDIN:
+                        cost = -cost
+                    total_cost += cost
 
                 last_stat_sum += total_cost
 
